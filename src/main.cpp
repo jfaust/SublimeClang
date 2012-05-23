@@ -24,6 +24,13 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <algorithm>
+
+#if _WIN32
+   #define EXPORT_SYMBOL __declspec(dllexport)
+#else
+   #define EXPORT_SYMBOL
+#endif
 
 CXChildVisitResult haschildren_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
@@ -247,7 +254,11 @@ void parse_res(std::string& returnType, std::string& insertion, std::string& rep
             {
                 placeholderCount++;
                 char buf[512];
-                snprintf(buf, 512, "${%d:%s}", placeholderCount, spelling);
+                #if _WIN32
+                  _snprintf(buf, 512, "${%d:%s}", placeholderCount, spelling);
+                #else
+                  snprintf(buf, 512, "${%d:%s}", placeholderCount, spelling);
+                #endif
                 insertion += buf;
             }
             else
@@ -569,7 +580,7 @@ public:
     }
     virtual void execute()
     {
-        clang_visitChildren(mBase, &visitor, this);
+        clang_visitChildren(mBase, &NamespaceFinder::visitor, this);
     }
 
     virtual bool visitor(CXCursor cursor, CXCursor parent, bool &recurse, CXCursorKind ck) = 0;
@@ -861,40 +872,40 @@ private:
 extern "C"
 {
 
-CacheCompletionResults* cache_clangComplete(Cache* cache, const char *filename, unsigned int row, unsigned int col, CXUnsavedFile *unsaved, unsigned int usLength, bool memberCompletion)
+EXPORT_SYMBOL CacheCompletionResults* cache_clangComplete(Cache* cache, const char *filename, unsigned int row, unsigned int col, CXUnsavedFile *unsaved, unsigned int usLength, bool memberCompletion)
 {
     return cache->clangComplete(filename, row, col, unsaved, usLength, memberCompletion);
 }
 
-CacheCompletionResults* cache_completeCursor(Cache* cache, CXCursor cur)
+EXPORT_SYMBOL CacheCompletionResults* cache_completeCursor(Cache* cache, CXCursor cur)
 {
     return cache->completeCursor(cur);
 }
 
-CXCursor cache_findType(Cache* cache, const char **namespaces, unsigned int nsLength, const char *type)
+EXPORT_SYMBOL CXCursor cache_findType(Cache* cache, const char **namespaces, unsigned int nsLength, const char *type)
 {
     return cache->findType(namespaces, nsLength, type);
 }
-CacheCompletionResults* cache_completeNamespace(Cache* cache, const char **namespaces, unsigned int length)
+EXPORT_SYMBOL CacheCompletionResults* cache_completeNamespace(Cache* cache, const char **namespaces, unsigned int length)
 {
     return cache->getNamespaceMembers(namespaces, length);
 }
 
-CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
+EXPORT_SYMBOL CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
 {
     return cache->complete(prefix);
 }
-void cache_disposeCompletionResults(CacheCompletionResults *comp)
+EXPORT_SYMBOL void cache_disposeCompletionResults(CacheCompletionResults *comp)
 {
     delete comp;
 }
 
-Cache* createCache(CXCursor base)
+EXPORT_SYMBOL Cache* createCache(CXCursor base)
 {
     return new Cache(base);
 }
 
-void deleteCache(Cache *cache)
+EXPORT_SYMBOL void deleteCache(Cache *cache)
 {
     delete cache;
 }

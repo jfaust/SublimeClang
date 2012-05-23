@@ -16,7 +16,7 @@ add_library(cache SHARED main.cpp )
 
 target_link_libraries(
     cache
-    clang
+    libclang
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
