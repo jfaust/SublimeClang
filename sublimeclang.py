@@ -327,7 +327,7 @@ def display_compilation_results(view):
         if len(tu.var.diagnostics):
             errString = ""
             for diag in tu.var.diagnostics:
-                if ("once in main file" in diag.spelling):
+                if ("once in main file" in diag.spelling or "dllimport attribute ignored" in diag.spelling):
                     continue
                 f = diag.location
                 filename = ""
