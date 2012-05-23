@@ -327,6 +327,8 @@ def display_compilation_results(view):
         if len(tu.var.diagnostics):
             errString = ""
             for diag in tu.var.diagnostics:
+                if ("once in main file" in diag.spelling):
+                    continue
                 f = diag.location
                 filename = ""
                 if f.file != None:
@@ -358,7 +360,7 @@ def display_compilation_results(view):
                 """
                 add_error_mark(
                     diag.severityName, filename, f.line - 1, diag.spelling)
-            show = get_setting("show_output_panel", True, view)
+            show = (warningCount > 0 or errorCount > 0) and get_setting("show_output_panel", True, view)
     finally:
         tu.unlock()
     if (errorCount > 0 or warningCount > 0) and get_setting("show_status", True, view):
